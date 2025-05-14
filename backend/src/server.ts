@@ -7,9 +7,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Routes
-app.get('/', (req, res) => {
-  res.send('Hello from TypeScript + Node.js server!');
+app.get('/verify', (req, res) => {
+  res.send('Confirmed!');
 });
+
+app.put('/sign', (req, res) => {
+  res.send('Received!');
+});
+
+app.post('/hash', (req, res) => {
+  res.send('Hashed!');
+});
+
 
 // Start server
 app.listen(PORT, () => {

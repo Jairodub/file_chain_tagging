@@ -1,5 +1,9 @@
 import express from 'express';
 
+import {EphemeralKeyPair} from '@aptos-labs/ts-sdk';
+ 
+const ephemeralKeyPair = EphemeralKeyPair.generate();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

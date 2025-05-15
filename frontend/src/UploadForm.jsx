@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-//.jpg, .pdf, 
+//.jpg, .pdf, . PNG
 export default function UploadForm() {
   const [file, setFile] = useState(null);
   const [fileHash, setFileHash] = useState("");

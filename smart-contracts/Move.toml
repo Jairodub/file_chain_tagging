@@ -1,0 +1,14 @@
+[package]
+name = "FileAuthLedger"
+version = "1.0.0"
+authors = []
+
+[addresses]
+FileAuthLedger = "0x2dd22826f0e53e206638bc725371fd52f10e36d3d4d2dc3c83d0c6aae6edcd7f"
+IdentityRegistry = "0x2dd22826f0e53e206638bc725371fd52f10e36d3d4d2dc3c83d0c6aae6edcd7f"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "testnet" }
+
+[dev-dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "testnet" }

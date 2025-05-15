@@ -70,6 +70,10 @@ export default function UploadForm() {
     transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
     backgroundColor: 'rgba(30, 41, 59, 0.8)',
     color: '#E2E8F0',
+    boxSizing: 'border-box',
+    maxWidth: '100%',
+    overflowX: 'hidden',
+    textOverflow: 'ellipsis'
   };
 
   const buttonStyle = {
@@ -152,7 +156,7 @@ export default function UploadForm() {
         </div>
       </div>
       
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1.5rem', width: '100%' }}>
         <label style={{ 
           display: 'block', 
           marginBottom: '0.5rem', 

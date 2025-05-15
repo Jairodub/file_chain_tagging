@@ -76,10 +76,10 @@ const VerificationPage = () => {
     transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
     backgroundColor: 'rgba(30, 41, 59, 0.8)',
     color: '#E2E8F0',
-    ':focus': {
-      borderColor: '#4F46E5',
-      boxShadow: '0 0 0 2px rgba(79, 70, 229, 0.25)'
-    }
+    boxSizing: 'border-box',
+    maxWidth: '100%',
+    overflowX: 'hidden',
+    textOverflow: 'ellipsis'
   };
 
   const buttonStyle = {
@@ -181,7 +181,7 @@ const VerificationPage = () => {
           </div>
         </div>
         
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', width: '100%' }}>
           <label style={{ 
             display: 'block', 
             marginBottom: '0.5rem', 

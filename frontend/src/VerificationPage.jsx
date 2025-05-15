@@ -30,7 +30,7 @@ const VerificationPage = () => {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: 'auto' }}>
-      <h2>🔍 Verify File Authenticity</h2>
+      <h2>Verify File Authenticity</h2>
       <form onSubmit={handleVerify}>
         <input type="file" onChange={handleFileChange} accept="*" />
         <br /><br />

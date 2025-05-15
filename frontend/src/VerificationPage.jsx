@@ -65,52 +65,167 @@ const VerificationPage = () => {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    border: '1px solid #E5E7EB',
+    marginBottom: '1rem',
+    fontSize: '1rem',
+    outline: 'none',
+    transition: 'border-color 0.15s ease-in-out',
+    ':focus': {
+      borderColor: '#4F46E5',
+    }
+  };
+
+  const buttonStyle = {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#4F46E5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    opacity: loading ? 0.7 : 1,
+    fontWeight: '600',
+    fontSize: '1rem',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(79, 70, 229, 0.3)',
+    width: '100%'
+  };
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: 'auto' }}>
-      <h2>Verify File Authenticity</h2>
+    <div>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem', color: '#111827' }}>
+        Verify File Authenticity
+      </h2>
       
       <form onSubmit={handleVerify}>
-        <div style={{ marginBottom: '1rem' }}>
-          <p>Upload a file to verify:</p>
-          <input type="file" onChange={handleFileChange} accept="*" />
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            fontWeight: '500',
+            color: '#374151'
+          }}>
+            Upload a file to verify:
+          </label>
+          <div style={{
+            border: '2px dashed #E5E7EB',
+            borderRadius: '6px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            backgroundColor: '#F9FAFB',
+            cursor: 'pointer'
+          }}>
+            <input 
+              type="file" 
+              onChange={handleFileChange} 
+              accept="*" 
+              style={{ display: 'none' }} 
+              id="fileInput" 
+            />
+            <label htmlFor="fileInput" style={{ cursor: 'pointer' }}>
+              <div style={{ marginBottom: '0.5rem' }}>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="48" 
+                  height="48" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#9CA3AF" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 14V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <div style={{ fontWeight: '500' }}>
+                {file ? file.name : 'Click to select or drag and drop a file here'}
+              </div>
+              <div style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                Any file type supported
+              </div>
+            </label>
+          </div>
         </div>
         
-        <div style={{ marginBottom: '1rem' }}>
-          <p>Or enter a hash directly:</p>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            fontWeight: '500',
+            color: '#374151'
+          }}>
+            Or enter a hash directly:
+          </label>
           <input 
             type="text" 
             placeholder="Enter file hash to verify" 
             value={inputHash}
             onChange={(e) => setInputHash(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+            style={inputStyle}
           />
         </div>
         
         <button 
           type="submit" 
           disabled={loading}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#4F46E5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.25rem',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
-          }}
+          style={buttonStyle}
         >
-          {loading ? 'Verifying...' : 'Verify File'}
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg 
+                className="animate-spin" 
+                style={{ 
+                  animation: 'spin 1s linear infinite',
+                  marginRight: '0.5rem' 
+                }}
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+              </svg>
+              Verifying...
+            </div>
+          ) : 'Verify File'}
         </button>
       </form>
 
       {fileHash && (
-        <div style={{ marginTop: '1rem', wordBreak: 'break-all' }}>
-          <strong>File SHA-256:</strong> {fileHash}
+        <div style={{ 
+          marginTop: '1.5rem', 
+          wordBreak: 'break-all',
+          padding: '1rem',
+          backgroundColor: '#F3F4F6',
+          borderRadius: '6px'
+        }}>
+          <div style={{ fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>File SHA-256:</div>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>{fileHash}</div>
         </div>
       )}
 
       {verificationResult && (
-        <div style={{ marginTop: '1rem', fontWeight: 'bold' }}>
+        <div style={{ 
+          marginTop: '1.5rem', 
+          fontWeight: '500',
+          padding: '1rem',
+          backgroundColor: verificationResult.includes('✅') ? '#ECFDF5' : '#FEF2F2',
+          color: verificationResult.includes('✅') ? '#065F46' : '#B91C1C',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
           {verificationResult}
         </div>
       )}

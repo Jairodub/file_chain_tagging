@@ -49,7 +49,7 @@ function App() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            File Chain Tagging
+            HashProof
           </h1>
           <p style={{
             color: 'rgba(255, 255, 255, 0.7)',
@@ -125,7 +125,7 @@ function App() {
         fontSize: '0.875rem',
         color: '#64748B'
       }}>
-        © 2025 File Chain Tagging. All rights reserved.
+        © 2025 HashProof. All rights reserved.
       </div>
     </div>
   );

@@ -62,19 +62,28 @@ module FileAuthLedger::file_auth_with_registry {
         registry: table::Table<vector<u8>, address>
     }
 
+    // Add this helper function to check if FileStore exists
+    public fun store_exists(addr: address): bool {
+        exists<FileStore>(addr)
+    }
+
+
     /// Initialize user's file store
-    public fun init_user(account: &signer) {
+    public entry fun init_user(account: &signer) {
+        let signer_addr = signer::address_of(account);
+        assert!(!exists<FileStore>(signer_addr), EALREADY_REGISTERED);
+        
         let store = FileStore {
             file_map: table::new(),
             history_map: table::new(),
             register_events: account::new_event_handle<FileRegisteredEvent>(account),
             version_events: account::new_event_handle<FileVersionEvent>(account)
         };
-        move_to(account, store);
-    }
+    move_to(account, store);
+}
 
     /// Initialize global file registry - called once by admin account
-    public fun init_registry(account: &signer) {
+    public entry fun init_registry(account: &signer) {
         let reg = FileRegistry {
             registry: table::new<vector<u8>, address>()
         };
@@ -103,6 +112,7 @@ module FileAuthLedger::file_auth_with_registry {
         registry_admin: address
     )  acquires FileStore, FileRegistry  {
         let signer_addr = signer::address_of(account);
+        assert!(exists<FileStore>(signer_addr), ESTORE_NOT_INITIALIZED);
     
         // Check parent authorization first
         if (!vector::is_empty(&parent_hash)) {

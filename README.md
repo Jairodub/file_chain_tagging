@@ -20,7 +20,33 @@ HashProof is a file verification and provenance system that leverages the Aptos 
 
 ## 🌐 Architecture Overview
 
-
+project-root/
+│
+├── backend/                       # Python FastAPI/Flask API
+│   ├── main.py                    # Routes:
+│   │   ├─ POST /hash              # Upload + hash file
+│   │   ├─ POST /sign              # Sign hash with user's Aptos key
+(use keyless )
+│   │   └─ GET /verify             # Verify if hash exists on-chain
+│   └── utils/                     # File hashing, Aptos TX signing utils
+│
+├── frontend/                      # React/Vite UI
+│   ├── src/
+│   │   ├─ UploadForm.jsx          # Upload and hash file
+│   │   ├─ VerificationPage.jsx    # Enter hash or file to verify
+│   │   └─ useWallet()             # Integrate Aptos wallet (e.g., Petra)
+│   └── public/
+│
+├── contracts/
+│   └── media_auth.move            # Move module:
+│       ├─ store_auth(hash, signer, parent_hash, timestamp)
+│       ├─ verify(hash) → bool
+│       └─ get_lineage(hash) → vector<parent_hash>
+│
+├── docker-compose.yml            # Launch backend, frontend, local devnet
+├── Dockerfile.backend            # FastAPI server container
+├── Dockerfile.frontend           # Vite/React app container
+└── README.md                     # Overview, setup, usage
 
 ---
 

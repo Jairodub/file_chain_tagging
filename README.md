@@ -14,6 +14,7 @@ HashProof is a file verification and provenance system that leverages the Aptos 
 
   > News & Media Orgs: Combat misinformation by verifying content authenticity before it’s shared. For example, IG news posts could include a verified origin tag, ensuring the source is credible.
 
+<img width="1288" alt="image" src="https://github.com/user-attachments/assets/409035fa-57e0-4ae9-8158-9f66507def2b" />
 
 ---
 

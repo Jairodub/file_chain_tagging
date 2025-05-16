@@ -3,6 +3,12 @@ import multer from 'multer';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import dotenv from "dotenv";
+import { AptosClient, AptosAccount, TxnBuilderTypes, BCS, HexString } from "aptos";
+
+const client = new AptosClient("https://fullnode.devnet.aptoslabs.com"); // Use testnet if preferred
+const privateKeyHex = process.env.PRIVATE_KEY!; // Store in .env file
+const account = new AptosAccount(HexString.ensure(privateKeyHex).toUint8Array());
 
 import {EphemeralKeyPair} from '@aptos-labs/ts-sdk';
  

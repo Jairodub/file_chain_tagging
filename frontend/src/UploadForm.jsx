@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useAuth } from './auth_context';
 
 //.jpg, .pdf, . PNG
 export default function UploadForm() {
+  const { account } = useAuth();
   const [file, setFile] = useState(null);
   const [fileHash, setFileHash] = useState("");
   const [parentHash, setParentHash] = useState("");

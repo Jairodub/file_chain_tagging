@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './src/auth_context';
+import { OAuthCallback } from './src/components/OAuthCallback';
 import VerificationPage from './src/VerificationPage';
 import UploadForm from './src/UploadForm';
 
-function App() {
+
+function MainContent() {
   const [activeTab, setActiveTab] = useState('upload');
-  const { auth, login, logout } = useAuth();
+  const { isAuthenticated, userAddress, login, logout } = useAuth();
 
   const handleAuth = async () => {
     try {
-      if (auth.isAuthenticated) {
-        logout();
+      if (isAuthenticated) {
+        await logout();
       } else {
         await login();
       }
@@ -55,7 +58,7 @@ function App() {
             onClick={handleAuth}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: auth.isAuthenticated ? '#10B981' : '#4F46E5',
+              backgroundColor: isAuthenticated ? '#10B981' : '#4F46E5',
               color: 'white',
               borderRadius: '6px',
               border: 'none',
@@ -65,8 +68,8 @@ function App() {
               transition: 'all 0.2s ease'
             }}
           >
-            {auth.isAuthenticated ? 
-              `Connected: ${auth.userAddress?.slice(0, 6)}...${auth.userAddress?.slice(-4)}` : 
+            {isAuthenticated ? 
+              `Connected: ${userAddress?.slice(0, 6)}...${userAddress?.slice(-4)} logout?` : 
               'Connect with Keyless'}
           </button>
         </div>
@@ -157,7 +160,7 @@ function App() {
         border: '1px solid rgba(99, 102, 241, 0.2)',
         backgroundImage: 'radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.1), transparent 60%)'
       }}>
-        {activeTab === 'upload' && !auth.isAuthenticated ? (
+        {activeTab === 'upload' && !isAuthenticated ? (
           <div style={{ 
             textAlign: 'center', 
             padding: '2rem',
@@ -195,6 +198,19 @@ function App() {
         © 2025 HashProof. All rights reserved.
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
+        <Route path="/" element={<MainContent />} />
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -3,6 +3,14 @@ import { Aptos,AptosConfig,Network,KeylessAccount,EphemeralKeyPair } from "@apto
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
+const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes before expiry
+
+interface SessionMetadata {
+  lastVerified: number;
+  expiresAt: number;
+}
+
 interface AuthContextType {
   account: KeylessAccount | null;
   isLoading: boolean;
@@ -13,6 +21,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   userAddress: string | null;
 }
+
 const storeIdToken = (token: string): void =>
   localStorage.setItem("@aptos/id_token", token);
 
@@ -83,6 +92,15 @@ const decodeKeylessAccount = (encodedAccount: string): KeylessAccount =>
       return KeylessAccount.fromBytes(e.data);
     return e;
   });
+
+  const setSessionMetadata = (metadata: SessionMetadata): void => {
+    localStorage.setItem('@aptos/session_metadata', JSON.stringify(metadata));
+  };
+  
+  const getSessionMetadata = (): SessionMetadata | null => {
+    const data = localStorage.getItem('@aptos/session_metadata');
+    return data ? JSON.parse(data) : null;
+  };
 
 const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
 
@@ -199,11 +217,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       storeIdToken(idToken);
       storeEphemeralKeyPair(ekp);
       storeKeylessAccount(keylessAccount);
-  
       setAccount(keylessAccount);
+
+      // Set session metadata
+      setSessionMetadata({
+        lastVerified: Date.now(),
+        expiresAt: Date.now() + SESSION_DURATION
+      });
+
       setError(null);
     } catch (err) {
-      console.error('Login error:', err);
       setError(err instanceof Error ? err : new Error(String(err)));
       setAccount(null);
       
@@ -230,11 +253,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setAccount(null);
       setError(null);
     } catch (error) {
-      console.error('Logout error:', error);
     } finally {
       setIsLoading(false);
     }
+    
   };
+  const refreshSession = async () => {
+    const metadata = getSessionMetadata();
+    const now = Date.now();
+
+    if (!metadata || now >= metadata.expiresAt - REFRESH_THRESHOLD) {
+      console.log('Session expired or near expiry, initiating new login...');
+      await logout();
+      login();
+      return;
+    }
+
+    // Update last verified timestamp
+    setSessionMetadata({
+      ...metadata,
+      lastVerified: now
+    });
+  };
+
+  // Add session check effect
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkInterval = setInterval(refreshSession, 60000); // Check every minute
+    return () => clearInterval(checkInterval);
+  }, [isAuthenticated]);
 
 
  // Replace the empty useEffect with proper session restoration
@@ -247,22 +295,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       setIsLoading(true);
-      console.log('Attempting to restore session...');
       // Skip session restoration on callback route
       if (window.location.pathname === '/oauth/callback') {
-        console.log("callback path return")
         return;
       }
 
       const storedAccount = getLocalKeylessAccount();
       const storedToken = getStoredIdToken();
       const storedEkp = getLocalEphemeralKeyPair();
-      console.log('Stored credentials:', {
-        hasAccount: !!storedAccount,
-        hasToken: !!storedToken,
-        hasEkp: !!storedEkp
-      });
-
+      
       if (storedAccount) {
         setAccount(storedAccount);
         setError(null);

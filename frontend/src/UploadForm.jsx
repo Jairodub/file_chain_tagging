@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useAuth } from './auth_context';
+import { createFileRegistrationService } from './file/fileRegistration';
 
 //.jpg, .pdf, . PNG
 export default function UploadForm() {
@@ -8,6 +8,10 @@ export default function UploadForm() {
   const [file, setFile] = useState(null);
   const [fileHash, setFileHash] = useState("");
   const [parentHash, setParentHash] = useState("");
+  const [fileType, setFileType] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
+  const [permission, setPermission] = useState("2");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,8 +23,12 @@ export default function UploadForm() {
     }
   };
 
+ 
+
   const handleUpload = async () => {
     if (!file) return setStatus("Please select a file first.");
+    if (!fileType) return setStatus("Please specify the file type.");
+    if (!account) return setStatus("Please login first.");
 
     setLoading(true);
 
@@ -32,30 +40,32 @@ export default function UploadForm() {
       const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       setFileHash(hexHash);
 
-      // Ask user to sign with Petra (optional for backend auth)
-      const aptos = window.aptos;
-      if (!aptos) {
-        setStatus("Aptos wallet not found. Please install Petra.");
-        setLoading(false);
-        return;
-      }
+      // Initialize the registration service
+      const registrationService = createFileRegistrationService(
+        import.meta.env.VITE_CONTRACT_ADDRESS,
+        import.meta.env.VITE_REGISTRY_ADMIN,
+        account
+      );
 
-      const sender = await aptos.account();
-      const response = await axios.post("http://localhost:8000/hash", {
-        hash: hexHash,
-        parent_hash: parentHash || null,
-        signer: sender.address
+      // Register the file
+      const txHash = await registrationService.registerFile({
+        fileHash: hexHash,
+        parentHash: parentHash || null,
+        fileType,
+        description,
+        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        permission: parseInt(permission)
       });
 
-      if (response.data.success) {
-        setStatus("✅ File hash stored successfully on-chain.");
-      } else {
-        setStatus("⚠️ Failed to store hash.");
-      }
+      setStatus(`✅ File registered successfully. Transaction: ${txHash}`);
       
     } catch (err) {
       console.error(err);
-      setStatus("❌ Error uploading file.");
+      if (err.message?.includes('already registered')) {
+        setStatus("❌ This file has already been registered.");
+      } else {
+        setStatus(`❌ Error: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -174,6 +184,86 @@ export default function UploadForm() {
           onChange={(e) => setParentHash(e.target.value)}
           style={inputStyle}
         />
+        <div style={{ marginBottom: '1.5rem', width: '100%' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '0.5rem', 
+          fontWeight: '500',
+          color: '#A5B4FC'
+        }}>
+          File Type *:
+        </label>
+        <input
+          type="text"
+          placeholder="e.g., document, image, contract"
+          value={fileType}
+          onChange={(e) => setFileType(e.target.value)}
+          style={inputStyle}
+          required
+        />
+      </div>
+
+      <div style={{ marginBottom: '1.5rem', width: '100%' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '0.5rem', 
+          fontWeight: '500',
+          color: '#A5B4FC'
+        }}>
+          Description:
+        </label>
+        <textarea
+          placeholder="Enter a description of the file"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          style={{
+            ...inputStyle,
+            minHeight: '100px',
+            resize: 'vertical'
+          }}
+        />
+      </div>
+
+      <div style={{ marginBottom: '1.5rem', width: '100%' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '0.5rem', 
+          fontWeight: '500',
+          color: '#A5B4FC'
+        }}>
+          Tags:
+        </label>
+        <input
+          type="text"
+          placeholder="Enter tags separated by commas"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          style={inputStyle}
+        />
+        <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>
+          Separate tags with commas (e.g., contract, legal, 2024)
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '1.5rem', width: '100%' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '0.5rem', 
+          fontWeight: '500',
+          color: '#A5B4FC'
+        }}>
+          Permission:
+        </label>
+        <select
+          value={permission}
+          onChange={(e) => setPermission(e.target.value)}
+          style={inputStyle}
+        >
+          <option value="2">Public</option>
+          <option value="1">Private</option>
+          <option value="0">Restricted</option>
+        </select>
+      </div>
         <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>
           Enter the hash of a parent file to create verifiable relationships between files
         </div>
@@ -206,7 +296,7 @@ export default function UploadForm() {
             </svg>
             Uploading...
           </div>
-        ) : 'Upload to Blockchain'}
+        ) : 'Register File'}
       </button>
 
       {fileHash && (

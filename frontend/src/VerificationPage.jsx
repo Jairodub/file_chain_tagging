@@ -1,30 +1,12 @@
 import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { createFileVerificationService } from './file/fileVerification';;
+import axios from 'axios';
 
-const fileVerificationService = createFileVerificationService(
-  import.meta.env.VITE_CONTRACT_ADDRESS,
-  import.meta.env.VITE_REGISTRY_ADMIN
-);
-const isValidHex = (hex) => /^[0-9a-fA-F]+$/.test(hex);
-
-const FileRecord = {
-  hash: '',
-  parent_hash: null,
-  signer: '',
-  fileType: '',
-  description: '',
-  tags: [],
-  permission: '',
-  timestamp: '',
-};
 const VerificationPage = () => {
   const [file, setFile] = useState(null);
   const [fileHash, setFileHash] = useState('');
   const [verificationResult, setVerificationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [inputHash, setInputHash] = useState('');
-  const [fileRecord, setFileRecord] = useState(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -40,15 +22,7 @@ const VerificationPage = () => {
       return;
     }
 
-    // Validate hex input
-  if (inputHash && !isValidHex(inputHash)) {
-    setVerificationResult('❌ Invalid hash format. Please enter a valid hexadecimal value.');
-    return;
-  }
-
     setLoading(true);
-    setFileRecord(null);
-    setVerificationResult(null);
 
     try {
       let hashToVerify = inputHash;
@@ -63,26 +37,33 @@ const VerificationPage = () => {
         hashToVerify = calculatedHash;
       }
 
-      if (!isValidHex(hashToVerify)) {
-        throw new Error('Invalid hash format');
+      // For now using a placeholder verification process
+      // In a real implementation, you'd verify against your blockchain or backend
+      setTimeout(() => {
+        setVerificationResult(`✅ Hash ${hashToVerify.slice(0, 16)}... verified successfully (placeholder)`);
+        setLoading(false);
+      }, 1000);
+      
+      // Uncomment for actual implementation
+      /* 
+      const response = await axios.post('http://localhost:8000/verify', {
+        hash: hashToVerify
+      });
+      
+      if (response.data.verified) {
+        setVerificationResult(`✅ Hash verified successfully. Created at: ${response.data.timestamp}`);
+      } else {
+        setVerificationResult('❌ Hash not found or verification failed.');
       }
-
-      const record = await fileVerificationService.getFileRecordByHash(hashToVerify);
-    
-    if (record) {
-      setFileRecord(record);
-      setVerificationResult('✅ File verified successfully');
-    } else {
-      setVerificationResult('❌ File not found in records');
+      setLoading(false);
+      */
+      
+    } catch (err) {
+      console.error(err);
+      setVerificationResult('❌ Error verifying file.');
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Verification error:', err);
-    setVerificationResult('❌ File not found or verification failed');
-  } finally {
-    setLoading(false);
-  }
-};
-   
+  };
 
   const inputStyle = {
     width: '100%',
@@ -116,72 +97,6 @@ const VerificationPage = () => {
     width: '100%',
     background: 'linear-gradient(to right, #4F46E5, #7C3AED)'
   };
-
-  const FileDetails = ({ record }) => (
-    <div style={{ 
-      marginTop: '1.5rem',
-      padding: '1.5rem',
-      backgroundColor: 'rgba(15, 23, 42, 0.6)',
-      borderRadius: '8px',
-      border: '1px solid rgba(99, 102, 241, 0.3)'
-    }}>
-      <h3 style={{ 
-        color: '#A5B4FC',
-        marginBottom: '1rem',
-        fontSize: '1.2rem',
-        fontWeight: '600'
-      }}>
-        File Record Details
-      </h3>
-      
-      <div style={{ display: 'grid', gap: '1rem' }}>
-        <DetailRow label="File Type" value={record.file_type} />
-        <DetailRow label="Description" value={record.description} />
-        <DetailRow label="Tags" value={record.tags.join(', ')} />
-        <DetailRow label="Permission" value={record.permission.toString()} />
-        <DetailRow label="Owner" value={record.owner} monospace />
-        <DetailRow label="Signer" value={record.signer} monospace />
-        <DetailRow 
-          label="Parent Hash" 
-          value={record.parent_hash || 'None'} 
-          monospace
-        />
-        <DetailRow 
-          label="Root Hash" 
-          value={record.root_hash} 
-          monospace
-        />
-        <DetailRow 
-          label="Timestamp" 
-          value={format(new Date(record.timestamp), 'PPpp')}
-        />
-      </div>
-    </div>
-  );
-  
-  const DetailRow = ({ label, value, monospace = false }) => (
-    <div>
-      <div style={{ 
-        color: '#A5B4FC',
-        fontSize: '0.875rem',
-        marginBottom: '0.25rem'
-      }}>
-        {label}:
-      </div>
-      <div style={{ 
-        color: '#E2E8F0',
-        fontSize: '0.925rem',
-        fontFamily: monospace ? 'monospace' : 'inherit',
-        padding: '0.5rem',
-        backgroundColor: 'rgba(30, 41, 59, 0.8)',
-        borderRadius: '4px',
-        border: '1px solid rgba(99, 102, 241, 0.2)',
-        wordBreak: 'break-all'
-      }}>
-        {value}
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -355,9 +270,6 @@ const VerificationPage = () => {
           {verificationResult}
         </div>
       )}
-
-      {fileRecord && <FileDetails record={fileRecord} />}
-      
     </div>
   );
 };

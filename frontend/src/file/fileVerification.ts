@@ -39,40 +39,40 @@ export class FileVerificationService {
     this.contractAddress = contractAddress;
   }
 
-  async getFileRecord(owner: string, fileHash: string): Promise<FileEntry> {
-    console.log("getting file record")
-    try {
-        const result = await this.aptos.view({
-          payload: {
-            function: `${this.contractAddress}::file_auth_with_registry::get_file_record`,
-            typeArguments: [],
-            functionArguments: [owner,hexToByteArray(fileHash)]
-          }
-        });
-      // Debug log the raw response
-      console.log("Raw response:", JSON.stringify(result, null, 2));
+//   async getFileRecord(owner: string, fileHash: string): Promise<FileEntry> {
+//     console.log("getting file record")
+//     try {
+//         const result = await this.aptos.view({
+//           payload: {
+//             function: `${this.contractAddress}::file_auth_with_registry::get_file_record`,
+//             typeArguments: [],
+//             functionArguments: [owner,hexToByteArray(fileHash)]
+//           }
+//         });
+//       // Debug log the raw response
+//       console.log("Raw response:", JSON.stringify(result, null, 2));
 
-      // The Aptos view function returns the data directly, no need for .value
-        const record = result[0] as any;
-        if (!record) throw new Error("No record returned");
-        const timestamp = Number(record.timestamp) * 1000;
-        return {
-            file_hash: uint8ArrayToHex(record.file_hash),
-            root_hash: uint8ArrayToHex(record.root_hash),
-            owner: record.owner,
-            signer: record.signer,
-            timestamp: timestamp,
-            parent_hash: uint8ArrayToHex(record.parent_hash),
-            file_type: record.file_type,
-            description: record.description,
-            tags: record.tags,
-            permission: Number(record.permission)
-        };
-    } catch (error) {
-        console.error("Get file record error:", error);
-        throw new Error(`Failed to get file record: ${error}`);
-    }
-}
+//       // The Aptos view function returns the data directly, no need for .value
+//         const record = result[0] as any;
+//         if (!record) throw new Error("No record returned");
+//         const timestamp = Number(record.timestamp) * 1000;
+//         return {
+//             file_hash: uint8ArrayToHex(record.file_hash),
+//             root_hash: uint8ArrayToHex(record.root_hash),
+//             owner: record.owner,
+//             signer: record.signer,
+//             timestamp: timestamp,
+//             parent_hash: uint8ArrayToHex(record.parent_hash),
+//             file_type: record.file_type,
+//             description: record.description,
+//             tags: record.tags,
+//             permission: Number(record.permission)
+//         };
+//     } catch (error) {
+//         console.error("Get file record error:", error);
+//         throw new Error(`Failed to get file record: ${error}`);
+//     }
+// }
 
 private async isFileRegistered(fileHash: string): Promise<boolean> {
   const result = await this.aptos.view({

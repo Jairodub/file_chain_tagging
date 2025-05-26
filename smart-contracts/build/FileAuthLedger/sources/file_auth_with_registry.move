@@ -101,7 +101,7 @@ module FileAuthLedger::file_auth_with_registry {
     }
 
     /// Register a new file or modified version
-    public entry fun register_file(
+    public fun register_file(
         account: &signer,
         file_hash: vector<u8>,
         parent_hash: vector<u8>,
@@ -131,7 +131,7 @@ module FileAuthLedger::file_auth_with_registry {
         assert!(permission <= 2, EINVALID_PERMISSION);
         
         // let signer_addr = signer::address_of(account);
-        // let store_ref = borrowGAS_LIMIT=2000_global_mut<FileStore>(signer_addr);
+        // let store_ref = borrow_global_mut<FileStore>(signer_addr);
 
         // assert!(
         //     !table::contains(&store_ref.file_map, file_hash),
@@ -202,7 +202,6 @@ module FileAuthLedger::file_auth_with_registry {
     }
 
     /// Get a file record
-    #[view]
     public fun get_file_record(account: address, file_hash: vector<u8>): FileEntry
         acquires FileStore {
         let store_ref = borrow_global<FileStore>(account);
@@ -211,7 +210,6 @@ module FileAuthLedger::file_auth_with_registry {
 
 
     /// Get full version history for a file root
-    #[view]
     public fun get_file_history(account: address, root_hash: vector<u8>): FileHistory 
         acquires FileStore {
         let store_ref = borrow_global<FileStore>(account);
@@ -219,7 +217,6 @@ module FileAuthLedger::file_auth_with_registry {
     }
 
     /// Look up owner from global registry using only file hash
-    #[view]
     public fun get_file_owner_by_hash(registry_admin: address, file_hash: vector<u8>): address 
         acquires FileRegistry{
         let registry_ref = borrow_global<FileRegistry>(registry_admin);
@@ -227,7 +224,6 @@ module FileAuthLedger::file_auth_with_registry {
     }
 
     /// Check whether a file exists in the global registry
-    #[view]
     public fun is_file_registered(registry_admin: address, file_hash: vector<u8>): bool
         acquires FileRegistry {
         let registry_ref = borrow_global<FileRegistry>(registry_admin);

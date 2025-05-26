@@ -4,7 +4,6 @@ import { createFileRegistrationService } from './file/fileRegistration';
 
 //.jpg, .pdf, . PNG
 export default function UploadForm() {
-  const { account } = useAuth();
   const [file, setFile] = useState(null);
   const [fileHash, setFileHash] = useState("");
   const [parentHash, setParentHash] = useState("");

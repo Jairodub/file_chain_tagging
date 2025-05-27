@@ -70,5 +70,3 @@ cd ../contracts
 aptos init  # if not already initialized
 aptos move compile
 aptos move publish --profile default
-
-

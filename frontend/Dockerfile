@@ -9,7 +9,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copy source code
-COPY ./frontend .
+COPY . .
 
 # Expose port
 EXPOSE 3001

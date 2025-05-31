@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "./auth_context";
 import { createFileRegistrationService } from "./file/fileRegistration";
+import { MagikaService } from "./file/fileMagika";
 
 //.jpg, .pdf, . PNG
 export default function UploadForm() {
@@ -14,18 +15,48 @@ export default function UploadForm() {
 	const [permission, setPermission] = useState("2");
 	const [status, setStatus] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [analyzing, setAnalyzing] = useState(false);
+	const [magikaService] = useState(() => new MagikaService());
 
-	const handleFileChange = (e) => {
+	useEffect(() => {
+		return () => {
+			magikaService.dispose();
+		};
+	}, [magikaService]);
+
+	const handleFileChange = async (e) => {
 		const selected = e.target.files[0];
 		if (selected) {
 			setFile(selected);
 			setStatus("");
+
+			try {
+				setAnalyzing(true);
+				const analysis = await magikaService.analyzeFile(selected);
+
+				if (analysis.confidence > 0.8) {
+					setFileType(analysis.fileType);
+					setStatus(
+						`⚡ File detected as ${analysis.fileType} (${Math.round(
+							analysis.confidence * 100
+						)}% confidence)`
+					);
+				} else {
+					setFileType(analysis.fileType);
+					setStatus("⚠️ Low confidence in file type detection, please verify");
+				}
+			} catch (error) {
+				console.error("File analysis error:", error);
+				setStatus("❌ Could not analyze file type");
+			} finally {
+				setAnalyzing(false);
+			}
 		}
 	};
 
 	const handleUpload = async () => {
 		if (!file) return setStatus("Please select a file first.");
-		if (!fileType) return setStatus("Please specify the file type.");
+		if (!fileType) return setStatus("File type could not be detected.");
 		if (!account) return setStatus("Please login first.");
 
 		setLoading(true);
@@ -183,6 +214,36 @@ export default function UploadForm() {
 					</label>
 				</div>
 			</div>
+			{analyzing && (
+				<div
+					style={{
+						marginTop: "1rem",
+						padding: "1rem",
+						backgroundColor: "rgba(99, 102, 241, 0.1)",
+						borderRadius: "6px",
+						border: "1px solid rgba(99, 102, 241, 0.3)",
+					}}
+				>
+					<div
+						style={{ display: "flex", alignItems: "center", color: "#A5B4FC" }}
+					>
+						<svg
+							className="animate-spin"
+							style={{
+								animation: "spin 1s linear infinite",
+								marginRight: "0.5rem",
+							}}
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+						>
+							<path d="M21 12a9 9 0 1 1-6.219-8.56" />
+						</svg>
+						Analyzing file type...
+					</div>
+				</div>
+			)}
 
 			<div style={{ marginBottom: "1.5rem", width: "100%" }}>
 				<label
@@ -211,16 +272,36 @@ export default function UploadForm() {
 							color: "#A5B4FC",
 						}}
 					>
-						File Type *:
+						File Type:
 					</label>
-					<input
-						type="text"
-						placeholder="e.g., document, image, contract"
-						value={fileType}
-						onChange={(e) => setFileType(e.target.value)}
-						style={inputStyle}
-						required
-					/>
+					<div
+						style={{
+							...inputStyle,
+							display: "flex",
+							alignItems: "center",
+							backgroundColor: "rgba(30, 41, 59, 0.8)",
+							cursor: "default",
+						}}
+					>
+						{fileType ? (
+							<span>{fileType}</span>
+						) : (
+							<span style={{ color: "#64748B" }}>
+								Upload a file to detect its type
+							</span>
+						)}
+					</div>
+					{fileType && (
+						<div
+							style={{
+								fontSize: "0.75rem",
+								color: "#64748B",
+								marginTop: "0.25rem",
+							}}
+						>
+							Type detected automatically using Magika
+						</div>
+					)}
 				</div>
 
 				<div style={{ marginBottom: "1.5rem", width: "100%" }}>

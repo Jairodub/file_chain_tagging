@@ -16,15 +16,31 @@ export default function UploadForm() {
 	const [status, setStatus] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [analyzing, setAnalyzing] = useState(false);
-	const [magikaService] = useState(() => new MagikaService());
+	const [magikaService, setMagikaService] = useState(null);
 
 	useEffect(() => {
-		return () => {
-			magikaService.dispose();
-		};
-	}, [magikaService]);
+		const service = new MagikaService();
+		setMagikaService(service);
 
+		return () => {
+			if (service) {
+				service.dispose().catch(console.error);
+			}
+		};
+	}, []);
+	useEffect(() => {
+		return () => {
+			// Cleanup file data on unmount
+			if (file) {
+				URL.revokeObjectURL(URL.createObjectURL(file));
+				setFile(null);
+			}
+		};
+	}, [file]);
 	const handleFileChange = async (e) => {
+		if (file) {
+			URL.revokeObjectURL(URL.createObjectURL(file));
+		}
 		const selected = e.target.files[0];
 		if (selected) {
 			setFile(selected);
@@ -37,7 +53,7 @@ export default function UploadForm() {
 				if (analysis.confidence > 0.8) {
 					setFileType(analysis.fileType);
 					setStatus(
-						`⚡ File detected as ${analysis.fileType} (${Math.round(
+						`✅ File detected as ${analysis.fileType} (${Math.round(
 							analysis.confidence * 100
 						)}% confidence)`
 					);

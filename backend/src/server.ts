@@ -1,7 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { configurePassport } from './config/passport';
+// import { configurePassport } from './config/passport';
 import cors from 'cors';
 import sponsorRoutes from './routes/sponsorRoutes';
 // import { fileRouter } from './routes/fileRoutes';

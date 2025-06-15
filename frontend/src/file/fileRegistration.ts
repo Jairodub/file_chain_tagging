@@ -178,11 +178,6 @@ export class FileRegistrationService {
 				throw new Error(`Network request failed: ${error.message}`);
 			});
 
-			console.log("Sponsor response:", {
-				status: sponsorResponse.status,
-				statusText: sponsorResponse.statusText,
-			});
-
 			if (!sponsorResponse.ok) {
 				throw new Error("Failed to get fee payer signature");
 			}

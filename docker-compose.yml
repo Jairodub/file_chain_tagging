@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SPONSOR_PRIVATE_KEY=${SPONSOR_PRIVATE_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - FRONTEND_URL=http://localhost:3001
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - pafwa-network
+
   frontend:
     build:
       context: ./frontend
@@ -11,11 +28,20 @@ services:
       - VITE_CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
       - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - VITE_OAUTH_REDIRECT_URI=${OAUTH_REDIRECT_URI}
+      - VITE_API_URL=http://localhost:3000
+  
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - pafwa-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001"]
       interval: 30s
       timeout: 10s
       retries: 3
+networks:
+  pafwa-network:
+    driver: bridge
